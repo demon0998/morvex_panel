@@ -1,181 +1,104 @@
--- Morvex Tiny Panel (LocalScript) - put in StarterPlayerScripts
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+--// GUI Panel by Morvex
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local ToggleButton = Instance.new("ImageButton")
+local SettingsFrame = Instance.new("Frame")
+local SpeedBox = Instance.new("TextBox")
+local JumpBox = Instance.new("TextBox")
+local AutoEnable = Instance.new("TextButton")
+local ApplyButton = Instance.new("TextButton")
 
--- Replace with your image asset id
-local IMAGE_ASSET = "rbxassetid://YOUR_ASSET_ID"
+-- Parent GUI
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Character reference
-local char = player.Character or player.CharacterAdded:Wait()
-local humanoid = char:WaitForChild("Humanoid")
+-- Main Frame
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.BackgroundTransparency = 0.3
+MainFrame.Position = UDim2.new(0.4, 0, 0.3, 0)
+MainFrame.Size = UDim2.new(0, 200, 0, 200)
+MainFrame.Visible = false
 
--- GUI
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "MorvexTinyGui"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = player:WaitForChild("PlayerGui")
-
--- Icon button
-local iconBtn = Instance.new("ImageButton")
-iconBtn.Name = "MorvexIcon"
-iconBtn.Size = UDim2.new(0,60,0,60)
-iconBtn.Position = UDim2.new(0.02,0,0.4,0)
-iconBtn.Image = IMAGE_ASSET
-iconBtn.BackgroundTransparency = 0.2
-iconBtn.BackgroundColor3 = Color3.fromRGB(20,20,20)
-iconBtn.AutoButtonColor = true
-iconBtn.Active = true
-iconBtn.Parent = screenGui
-iconBtn.Draggable = true
-
--- Panel
-local panel = Instance.new("Frame")
-panel.Name = "MorvexPanel"
-panel.Size = UDim2.new(0,240,0,170)
-panel.Position = UDim2.new(0.05,0,0.45,0)
-panel.BackgroundColor3 = Color3.fromRGB(18,18,18)
-panel.BackgroundTransparency = 0.15
-panel.BorderSizePixel = 0
-panel.Visible = false
-panel.Parent = screenGui
-panel.Active = true
-panel.Draggable = true
-
--- Title
-local title = Instance.new("TextLabel", panel)
-title.Size = UDim2.new(1,0,0,32)
-title.Position = UDim2.new(0,0,0,0)
-title.BackgroundTransparency = 1
-title.Text = "Morvex Panel"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 18
-title.TextColor3 = Color3.fromRGB(255,200,255)
-
--- Speed
-local speedLbl = Instance.new("TextLabel", panel)
-speedLbl.Size = UDim2.new(0.5,0,0,28)
-speedLbl.Position = UDim2.new(0,8,0,40)
-speedLbl.BackgroundTransparency = 1
-speedLbl.Text = "Speed"
-speedLbl.TextColor3 = Color3.fromRGB(220,220,220)
-
-local speedBox = Instance.new("TextBox", panel)
-speedBox.Size = UDim2.new(0.45,0,0,28)
-speedBox.Position = UDim2.new(0.5, -8, 0, 40)
-speedBox.Text = "55"
-speedBox.ClearTextOnFocus = false
-speedBox.PlaceholderText = "WalkSpeed"
-
--- Jump
-local jumpLbl = Instance.new("TextLabel", panel)
-jumpLbl.Size = UDim2.new(0.5,0,0,28)
-jumpLbl.Position = UDim2.new(0,8,0,76)
-jumpLbl.BackgroundTransparency = 1
-jumpLbl.Text = "JumpPower"
-jumpLbl.TextColor3 = Color3.fromRGB(220,220,220)
-
-local jumpBox = Instance.new("TextBox", panel)
-jumpBox.Size = UDim2.new(0.45,0,0,28)
-jumpBox.Position = UDim2.new(0.5, -8, 0, 76)
-jumpBox.Text = "55"
-jumpBox.ClearTextOnFocus = false
-jumpBox.PlaceholderText = "JumpPower"
-
--- Enable button
-local enableBtn = Instance.new("TextButton", panel)
-enableBtn.Size = UDim2.new(0.9,0,0,30)
-enableBtn.Position = UDim2.new(0.05,0,0,116)
-enableBtn.Text = "Enable"
-enableBtn.Font = Enum.Font.GothamBold
-enableBtn.TextSize = 16
-enableBtn.BackgroundColor3 = Color3.fromRGB(100,50,150)
-enableBtn.TextColor3 = Color3.fromRGB(255,255,255)
-
--- Persist button
-local persistBtn = Instance.new("TextButton", panel)
-persistBtn.Size = UDim2.new(0.9,0,0,24)
-persistBtn.Position = UDim2.new(0.05,0,0,148)
-persistBtn.Text = "Persist: OFF"
-persistBtn.Font = Enum.Font.Gotham
-persistBtn.TextSize = 14
-persistBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-persistBtn.TextColor3 = Color3.fromRGB(230,230,230)
-
--- States
-local active = false
-local persist = false
-local savedSpeed = 55
-local savedJump = 55
-
--- Apply values
-local function applyValuesToHumanoid(h)
-    if not h then return end
-    local s = tonumber(speedBox.Text) or savedSpeed
-    local j = tonumber(jumpBox.Text) or savedJump
-    savedSpeed = s
-    savedJump = j
-    pcall(function()
-        h.UseJumpPower = true
-        h.WalkSpeed = s
-        h.JumpPower = j
-    end)
-end
-
--- Restore defaults
-local function restoreHumanoidDefaults(h)
-    if not h then return end
-    pcall(function()
-        h.WalkSpeed = 16
-        h.JumpPower = 50
-    end)
-end
-
--- Toggle panel
-iconBtn.MouseButton1Click:Connect(function()
-    panel.Visible = not panel.Visible
+-- Toggle Button (الصورة بتاعتك)
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Parent = ScreenGui
+ToggleButton.BackgroundTransparency = 1
+ToggleButton.Position = UDim2.new(0, 20, 0.5, -50)
+ToggleButton.Size = UDim2.new(0, 100, 0, 100)
+ToggleButton.Image = "rbxassetid://106976568325950" -- صورتك
+ToggleButton.MouseButton1Click:Connect(function()
+	MainFrame.Visible = not MainFrame.Visible
 end)
 
--- Enable button logic
-enableBtn.MouseButton1Click:Connect(function()
-    local char = player.Character
-    if not char then return end
-    local h = char:FindFirstChildOfClass("Humanoid")
-    if not h then return end
+-- Settings Frame
+SettingsFrame.Name = "SettingsFrame"
+SettingsFrame.Parent = MainFrame
+SettingsFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+SettingsFrame.Size = UDim2.new(1, 0, 1, 0)
 
-    if not active then
-        applyValuesToHumanoid(h)
-        active = true
-        enableBtn.Text = "Disable"
-        enableBtn.BackgroundColor3 = Color3.fromRGB(180,50,50)
-    else
-        restoreHumanoidDefaults(h)
-        active = false
-        enableBtn.Text = "Enable"
-        enableBtn.BackgroundColor3 = Color3.fromRGB(100,50,150)
-    end
+-- Speed Box
+SpeedBox.Parent = SettingsFrame
+SpeedBox.PlaceholderText = "Speed"
+SpeedBox.Text = ""
+SpeedBox.Position = UDim2.new(0.1, 0, 0.2, 0)
+SpeedBox.Size = UDim2.new(0.8, 0, 0, 30)
+
+-- Jump Box
+JumpBox.Parent = SettingsFrame
+JumpBox.PlaceholderText = "JumpPower"
+JumpBox.Text = ""
+JumpBox.Position = UDim2.new(0.1, 0, 0.4, 0)
+JumpBox.Size = UDim2.new(0.8, 0, 0, 30)
+
+-- AutoEnable Button
+AutoEnable.Parent = SettingsFrame
+AutoEnable.Text = "Auto Enable"
+AutoEnable.Position = UDim2.new(0.1, 0, 0.6, 0)
+AutoEnable.Size = UDim2.new(0.8, 0, 0, 30)
+
+-- Apply Button
+ApplyButton.Parent = SettingsFrame
+ApplyButton.Text = "Apply"
+ApplyButton.Position = UDim2.new(0.1, 0, 0.8, 0)
+ApplyButton.Size = UDim2.new(0.8, 0, 0, 30)
+
+-- Variables
+local autoEnabled = false
+
+-- AutoEnable toggle
+AutoEnable.MouseButton1Click:Connect(function()
+	autoEnabled = not autoEnabled
+	AutoEnable.Text = autoEnabled and "Auto Enable: ON" or "Auto Enable: OFF"
 end)
 
--- Persist button logic
-persistBtn.MouseButton1Click:Connect(function()
-    persist = not persist
-    if persist then
-        persistBtn.Text = "Persist: ON"
-        persistBtn.BackgroundColor3 = Color3.fromRGB(50,150,50)
-    else
-        persistBtn.Text = "Persist: OFF"
-        persistBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-    end
+-- Apply button function
+ApplyButton.MouseButton1Click:Connect(function()
+	local plr = game.Players.LocalPlayer
+	local char = plr.Character or plr.CharacterAdded:Wait()
+	local hum = char:FindFirstChildOfClass("Humanoid")
+
+	if hum then
+		local speed = tonumber(SpeedBox.Text)
+		local jump = tonumber(JumpBox.Text)
+
+		if speed then
+			hum.WalkSpeed = speed
+		end
+		if jump then
+			hum.UseJumpPower = true
+			hum.JumpPower = jump
+		end
+	end
 end)
 
--- Respawn handler
-player.CharacterAdded:Connect(function(newChar)
-    char = newChar
-    humanoid = char:WaitForChild("Humanoid")
-    task.wait(0.3)
-    if persist or active then
-        applyValuesToHumanoid(humanoid)
-        active = true
-        enableBtn.Text = "Disable"
-        enableBtn.BackgroundColor3 = Color3.fromRGB(180,50,50)
-    end
+-- Reset detection
+game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
+	if autoEnabled then
+		char:WaitForChild("Humanoid").WalkSpeed = tonumber(SpeedBox.Text) or 16
+		char:WaitForChild("Humanoid").UseJumpPower = true
+		char:WaitForChild("Humanoid").JumpPower = tonumber(JumpBox.Text) or 50
+	end
 end)
+
