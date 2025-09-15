@@ -1,11 +1,11 @@
--- Morvex Tiny Panel (LocalScript) - حط في StarterPlayerScripts
+-- Morvex Tiny Panel (LocalScript) - put in StarterPlayerScripts
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
--- انتبه: حط هنا الـ AssetId بتاع الصورة اللي رفعتها
+-- Replace with your image asset id
 local IMAGE_ASSET = "rbxassetid://YOUR_ASSET_ID"
 
--- ريفرنس للشخصية (هنعيد تهيئته بعد كل ريسباون)
+-- Character reference
 local char = player.Character or player.CharacterAdded:Wait()
 local humanoid = char:WaitForChild("Humanoid")
 
@@ -15,22 +15,20 @@ screenGui.Name = "MorvexTinyGui"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- الـ أيقونة المربعة الصغيرة (صورة مربعة 60x60)
+-- Icon button
 local iconBtn = Instance.new("ImageButton")
 iconBtn.Name = "MorvexIcon"
-iconBtn.Size = UDim2.new(0,60,0,60)        -- الحجم الصغير المربع
-iconBtn.Position = UDim2.new(0.02,0,0.4,0) -- مكان ابتدائي (يسار الشاشة)
+iconBtn.Size = UDim2.new(0,60,0,60)
+iconBtn.Position = UDim2.new(0.02,0,0.4,0)
 iconBtn.Image = IMAGE_ASSET
 iconBtn.BackgroundTransparency = 0.2
 iconBtn.BackgroundColor3 = Color3.fromRGB(20,20,20)
 iconBtn.AutoButtonColor = true
 iconBtn.Active = true
 iconBtn.Parent = screenGui
-
--- خلي الايقونة قابلة للسحب
 iconBtn.Draggable = true
 
--- البانل اللي هيفتح
+-- Panel
 local panel = Instance.new("Frame")
 panel.Name = "MorvexPanel"
 panel.Size = UDim2.new(0,240,0,170)
@@ -43,7 +41,7 @@ panel.Parent = screenGui
 panel.Active = true
 panel.Draggable = true
 
--- عنوان
+-- Title
 local title = Instance.new("TextLabel", panel)
 title.Size = UDim2.new(1,0,0,32)
 title.Position = UDim2.new(0,0,0,0)
@@ -53,7 +51,7 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 title.TextColor3 = Color3.fromRGB(255,200,255)
 
--- Speed label + box
+-- Speed
 local speedLbl = Instance.new("TextLabel", panel)
 speedLbl.Size = UDim2.new(0.5,0,0,28)
 speedLbl.Position = UDim2.new(0,8,0,40)
@@ -68,7 +66,7 @@ speedBox.Text = "55"
 speedBox.ClearTextOnFocus = false
 speedBox.PlaceholderText = "WalkSpeed"
 
--- Jump label + box (حنستخدم JumpPower دايمًا)
+-- Jump
 local jumpLbl = Instance.new("TextLabel", panel)
 jumpLbl.Size = UDim2.new(0.5,0,0,28)
 jumpLbl.Position = UDim2.new(0,8,0,76)
@@ -83,40 +81,39 @@ jumpBox.Text = "55"
 jumpBox.ClearTextOnFocus = false
 jumpBox.PlaceholderText = "JumpPower"
 
--- تكتيف (Enable) زر
+-- Enable button
 local enableBtn = Instance.new("TextButton", panel)
 enableBtn.Size = UDim2.new(0.9,0,0,30)
 enableBtn.Position = UDim2.new(0.05,0,0,116)
-enableBtn.Text = "تفعيل"
+enableBtn.Text = "Enable"
 enableBtn.Font = Enum.Font.GothamBold
 enableBtn.TextSize = 16
 enableBtn.BackgroundColor3 = Color3.fromRGB(100,50,150)
 enableBtn.TextColor3 = Color3.fromRGB(255,255,255)
 
--- استمرار بعد الموت
+-- Persist button
 local persistBtn = Instance.new("TextButton", panel)
 persistBtn.Size = UDim2.new(0.9,0,0,24)
 persistBtn.Position = UDim2.new(0.05,0,0,148)
-persistBtn.Text = "لا يستمر بعد الموت"
+persistBtn.Text = "Persist: OFF"
 persistBtn.Font = Enum.Font.Gotham
 persistBtn.TextSize = 14
 persistBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 persistBtn.TextColor3 = Color3.fromRGB(230,230,230)
 
--- حالة المتغيرات
+-- States
 local active = false
 local persist = false
 local savedSpeed = 55
 local savedJump = 55
 
--- دوال مساعدة لتطبيق القيم على الهومانويد
+-- Apply values
 local function applyValuesToHumanoid(h)
     if not h then return end
     local s = tonumber(speedBox.Text) or savedSpeed
     local j = tonumber(jumpBox.Text) or savedJump
     savedSpeed = s
     savedJump = j
-    -- force UseJumpPower = true عشان حتى R15 يستخدم JumpPower القديم
     pcall(function()
         h.UseJumpPower = true
         h.WalkSpeed = s
@@ -124,6 +121,7 @@ local function applyValuesToHumanoid(h)
     end)
 end
 
+-- Restore defaults
 local function restoreHumanoidDefaults(h)
     if not h then return end
     pcall(function()
@@ -132,12 +130,12 @@ local function restoreHumanoidDefaults(h)
     end)
 end
 
--- ايقاف/فتح البانل لما تدوس الايقونة
+-- Toggle panel
 iconBtn.MouseButton1Click:Connect(function()
     panel.Visible = not panel.Visible
 end)
 
--- زر التفعيل
+-- Enable button logic
 enableBtn.MouseButton1Click:Connect(function()
     local char = player.Character
     if not char then return end
@@ -147,38 +145,37 @@ enableBtn.MouseButton1Click:Connect(function()
     if not active then
         applyValuesToHumanoid(h)
         active = true
-        enableBtn.Text = "إلغاء"
+        enableBtn.Text = "Disable"
         enableBtn.BackgroundColor3 = Color3.fromRGB(180,50,50)
     else
         restoreHumanoidDefaults(h)
         active = false
-        enableBtn.Text = "تفعيل"
+        enableBtn.Text = "Enable"
         enableBtn.BackgroundColor3 = Color3.fromRGB(100,50,150)
     end
 end)
 
--- زر استمرار بعد الموت
+-- Persist button logic
 persistBtn.MouseButton1Click:Connect(function()
     persist = not persist
     if persist then
-        persistBtn.Text = "يستمر بعد الموت ✔"
+        persistBtn.Text = "Persist: ON"
         persistBtn.BackgroundColor3 = Color3.fromRGB(50,150,50)
     else
-        persistBtn.Text = "لا يستمر بعد الموت"
+        persistBtn.Text = "Persist: OFF"
         persistBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
     end
 end)
 
--- لو الشخصية تولدت من جديد، نطبّق القيم لو الـ persist مفعل أو لو active مفعل
+-- Respawn handler
 player.CharacterAdded:Connect(function(newChar)
     char = newChar
-    humanoid = nil
     humanoid = char:WaitForChild("Humanoid")
-    wait(0.3) -- نص ثانية عشان يستقر الهومانويد
+    task.wait(0.3)
     if persist or active then
         applyValuesToHumanoid(humanoid)
         active = true
-        enableBtn.Text = "إلغاء"
+        enableBtn.Text = "Disable"
         enableBtn.BackgroundColor3 = Color3.fromRGB(180,50,50)
     end
 end)
