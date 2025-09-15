@@ -1,126 +1,214 @@
--- Morvex Panel
-local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local UICorner = Instance.new("UICorner")
-local Title = Instance.new("TextLabel")
-local CloseButton = Instance.new("TextButton")
-local FlyButton = Instance.new("TextButton")
-local AutoEnableButton = Instance.new("TextButton")
-local PlayerInput = Instance.new("TextBox")
+-- MorvexPanel v1.2 - Local client GUI
+-- Put this as a LocalScript (StarterPlayerScripts) or run via executor as a client script.
 
--- Parent to CoreGui
-ScreenGui.Parent = game:GetService("CoreGui")
-ScreenGui.Name = "MorvexPanel"
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
--- Main Frame
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
-MainFrame.Size = UDim2.new(0, 300, 0, 200)
-MainFrame.Active = true
-MainFrame.Draggable = true
+local player = Players.LocalPlayer
+if not player then return end
 
-UICorner.CornerRadius = UDim.new(0, 12)
-UICorner.Parent = MainFrame
+-- Replace with your own public decal asset id if you like
+local IMAGE_ASSET = "rbxassetid://106976568325950"
+
+-- GUI root
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MorvexPanelGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Floating Icon (draggable)
+local icon = Instance.new("ImageButton")
+icon.Name = "MorvexIcon"
+icon.Size = UDim2.new(0,64,0,64)
+icon.Position = UDim2.new(0.02,0,0.4,0)
+icon.Image = IMAGE_ASSET
+icon.BackgroundColor3 = Color3.fromRGB(30,30,30)
+icon.BackgroundTransparency = 0
+icon.AutoButtonColor = true
+icon.Parent = screenGui
+local iconCorner = Instance.new("UICorner", icon)
+iconCorner.CornerRadius = UDim.new(0,12)
+
+-- Panel
+local panel = Instance.new("Frame")
+panel.Name = "MorvexPanel"
+panel.Size = UDim2.new(0,300,0,260)
+panel.Position = UDim2.new(0.06,0,0.45,0)
+panel.BackgroundColor3 = Color3.fromRGB(18,18,18)
+panel.BorderSizePixel = 0
+panel.Visible = false
+panel.Active = true
+panel.Parent = screenGui
+local panelCorner = Instance.new("UICorner", panel)
+panelCorner.CornerRadius = UDim.new(0,14)
 
 -- Title
-Title.Parent = MainFrame
-Title.Text = "Morvex Panel"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 20
+local title = Instance.new("TextLabel", panel)
+title.Size = UDim2.new(1,0,0,36)
+title.Position = UDim2.new(0,0,0,0)
+title.BackgroundTransparency = 1
+title.Text = "Morvex Panel"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(255,255,255)
 
--- Close Button
-CloseButton.Parent = MainFrame
-CloseButton.Text = "X"
-CloseButton.Position = UDim2.new(1, -35, 0, 5)
-CloseButton.Size = UDim2.new(0, 30, 0, 30)
-CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseButton.Font = Enum.Font.GothamBold
-CloseButton.TextSize = 18
-CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-end)
+-- Close button (inside panel)
+local closeBtn = Instance.new("TextButton", panel)
+closeBtn.Size = UDim2.new(0,28,0,28)
+closeBtn.Position = UDim2.new(1,-34,0,4)
+closeBtn.Text = "✕"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 18
+closeBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
+closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
+local closeCorner = Instance.new("UICorner", closeBtn)
+closeCorner.CornerRadius = UDim.new(0,6)
 
--- Fly Button
-FlyButton.Parent = MainFrame
-FlyButton.Text = "Fly"
-FlyButton.Position = UDim2.new(0.05, 0, 0.3, 0)
-FlyButton.Size = UDim2.new(0, 120, 0, 40)
-FlyButton.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
-FlyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-FlyButton.Font = Enum.Font.GothamBold
-FlyButton.TextSize = 18
+-- Labels and boxes
+local function makeLabel(parent, text, posY)
+    local l = Instance.new("TextLabel", parent)
+    l.Size = UDim2.new(0.45,0,0,28)
+    l.Position = UDim2.new(0.03,0,0,posY)
+    l.BackgroundTransparency = 1
+    l.Text = text
+    l.TextColor3 = Color3.fromRGB(220,220,220)
+    l.Font = Enum.Font.Gotham
+    l.TextSize = 14
+    return l
+end
+local function makeBox(parent, posX, posY, default)
+    local b = Instance.new("TextBox", parent)
+    b.Size = UDim2.new(0.44,0,0,28)
+    b.Position = UDim2.new(posX,0,0,posY)
+    b.Text = tostring(default)
+    b.PlaceholderText = ""
+    b.ClearTextOnFocus = false
+    b.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    b.TextColor3 = Color3.fromRGB(255,255,255)
+    b.Font = Enum.Font.Gotham
+    b.TextSize = 14
+    local c = Instance.new("UICorner", b)
+    c.CornerRadius = UDim.new(0,8)
+    return b
+end
 
--- Auto Enable Button
-AutoEnableButton.Parent = MainFrame
-AutoEnableButton.Text = "Auto Enable"
-AutoEnableButton.Position = UDim2.new(0.55, 0, 0.3, 0)
-AutoEnableButton.Size = UDim2.new(0, 120, 0, 40)
-AutoEnableButton.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
-AutoEnableButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-AutoEnableButton.Font = Enum.Font.GothamBold
-AutoEnableButton.TextSize = 18
+makeLabel(panel, "Walk Speed", 44)
+local walkBox = makeBox(panel, 0.51, 44, 55)
 
--- Player Input (for targeting players to fly)
-PlayerInput.Parent = MainFrame
-PlayerInput.PlaceholderText = "Enter player name"
-PlayerInput.Position = UDim2.new(0.05, 0, 0.65, 0)
-PlayerInput.Size = UDim2.new(0, 270, 0, 35)
-PlayerInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-PlayerInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-PlayerInput.Font = Enum.Font.Gotham
-PlayerInput.TextSize = 16
+makeLabel(panel, "Jump Power", 84)
+local jumpBox = makeBox(panel, 0.51, 84, 55)
 
--- Fly Function
-local flying = false
-local speed = 50
+makeLabel(panel, "Fly Speed", 124)
+local flyBox = makeBox(panel, 0.51, 124, 50)
 
-local function setFly(character, enabled)
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        if enabled then
-            local BodyVelocity = Instance.new("BodyVelocity")
-            BodyVelocity.Velocity = Vector3.new(0, 0, 0)
-            BodyVelocity.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-            BodyVelocity.Parent = character.HumanoidRootPart
-            humanoid.PlatformStand = true
+-- Buttons
+local function makeButton(parent, text, posY, color)
+    local b = Instance.new("TextButton", parent)
+    b.Size = UDim2.new(0.94,0,0,34)
+    b.Position = UDim2.new(0.03,0,0,posY)
+    b.Text = text
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 15
+    b.TextColor3 = Color3.fromRGB(255,255,255)
+    b.BackgroundColor3 = color or Color3.fromRGB(80,80,80)
+    local c = Instance.new("UICorner", b)
+    c.CornerRadius = UDim.new(0,8)
+    return b
+end
+
+local applyBtn = makeButton(panel, "Apply Walk/Jump", 164, Color3.fromRGB(110,55,160))
+local flyToggleBtn = makeButton(panel, "Toggle Fly (F)", 204, Color3.fromRGB(50,120,210))
+local autoEnableBtn = makeButton(panel, "Auto Enable: OFF", 232, Color3.fromRGB(80,80,80))
+
+-- state
+local flyActive = false
+local flyConnection = nil
+local autoEnable = false
+
+-- helper apply function
+local function applyWalkJump()
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    pcall(function()
+        hum.UseJumpPower = true
+        hum.WalkSpeed = tonumber(walkBox.Text) or 55
+        hum.JumpPower = tonumber(jumpBox.Text) or 55
+    end)
+end
+
+applyBtn.MouseButton1Click:Connect(applyWalkJump)
+closeBtn.MouseButton1Click:Connect(function() panel.Visible = false end)
+
+-- Fly implementation (client-side)
+local function startFly()
+    if flyConnection then flyConnection:Disconnect() end
+    local char = player.Character
+    if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    flyActive = true
+    local speed = tonumber(flyBox.Text) or 50
+    flyConnection = RunService.RenderStepped:Connect(function()
+        if not flyActive then return end
+        if not root then return end
+        local dir = Vector3.new()
+        local cam = workspace.CurrentCamera
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir = dir + cam.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then dir = dir - cam.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then dir = dir - cam.CFrame.RightVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then dir = dir + cam.CFrame.RightVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0,1,0) end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0,1,0) end
+        if dir.Magnitude > 0 then
+            root.Velocity = dir.Unit * (tonumber(flyBox.Text) or speed)
         else
-            humanoid.PlatformStand = false
-            for _, v in pairs(character.HumanoidRootPart:GetChildren()) do
-                if v:IsA("BodyVelocity") then
-                    v:Destroy()
-                end
-            end
+            root.Velocity = Vector3.new(0,0,0)
         end
+    end)
+end
+
+local function stopFly()
+    flyActive = false
+    if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
+    local char = player.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        char.HumanoidRootPart.Velocity = Vector3.new(0,0,0)
     end
 end
 
--- Fly button action
-FlyButton.MouseButton1Click:Connect(function()
-    local player = game.Players.LocalPlayer
-    local char = player.Character or player.CharacterAdded:Wait()
-    flying = not flying
-    setFly(char, flying)
+flyToggleBtn.MouseButton1Click:Connect(function()
+    if flyActive then stopFly() else startFly() end
 end)
 
--- Auto Enable button action
-AutoEnableButton.MouseButton1Click:Connect(function()
-    local player = game.Players.LocalPlayer
-    local char = player.Character or player.CharacterAdded:Wait()
-    setFly(char, true)
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.KeyCode == Enum.KeyCode.F then
+        if flyActive then stopFly() else startFly() end
+    end
 end)
 
--- Target other player
-PlayerInput.FocusLost:Connect(function(enterPressed)
-    if enterPressed then
-        local name = PlayerInput.Text
-        local target = game.Players:FindFirstChild(name)
-        if target and target.Character then
-            setFly(target.Character, true)
+-- Auto enable toggle
+autoEnableBtn.MouseButton1Click:Connect(function()
+    autoEnable = not autoEnable
+    autoEnableBtn.Text = autoEnable and "Auto Enable: ON" or "Auto Enable: OFF"
+    autoEnableBtn.BackgroundColor3 = autoEnable and Color3.fromRGB(70,160,70) or Color3.fromRGB(80,80,80)
+end)
+
+-- reapply after respawn if autoEnable true
+player.CharacterAdded:Connect(function(char)
+    wait(0.35)
+    if autoEnable then
+        applyWalkJump()
+        if flyActive then
+            startFly()
         end
     end
+end)
+
+-- Toggle panel by clicking icon
+icon.MouseButton1Click:Connect(function()
+    panel.Visible = not panel.Visible
 end)
