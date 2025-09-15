@@ -1,135 +1,156 @@
---// GUI Panel by Morvex (Delta Style)
+-- Morvex Panel (Updated with Fly + Player Control)
+-- UI + Functions
 
-local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local ToggleButton = Instance.new("ImageButton")
-local Title = Instance.new("TextLabel")
-local SpeedBox = Instance.new("TextBox")
-local JumpBox = Instance.new("TextBox")
-local AutoEnable = Instance.new("TextButton")
-local ApplyButton = Instance.new("TextButton")
-local UICorner = Instance.new("UICorner")
-local UIStroke = Instance.new("UIStroke")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
 
--- Parent GUI
-ScreenGui.Parent = game.CoreGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+-- GUI
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 250, 0, 300)
+Frame.Position = UDim2.new(0.5, -125, 0.5, -150)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.Active = true
+Frame.Draggable = true
 
--- Toggle Button (صورتك)
-ToggleButton.Name = "ToggleButton"
-ToggleButton.Parent = ScreenGui
-ToggleButton.BackgroundTransparency = 1
-ToggleButton.Position = UDim2.new(0, 20, 0.5, -50)
-ToggleButton.Size = UDim2.new(0, 80, 0, 80)
-ToggleButton.Image = "rbxassetid://106976568325950"
-ToggleButton.MouseButton1Click:Connect(function()
-	MainFrame.Visible = not MainFrame.Visible
-end)
-
--- Main Frame (اللوحة الأساسية)
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-MainFrame.Position = UDim2.new(0.4, 0, 0.3, 0)
-MainFrame.Size = UDim2.new(0, 250, 0, 220)
-MainFrame.Visible = false
-
-UICorner.CornerRadius = UDim.new(0, 15)
-UICorner.Parent = MainFrame
-
-UIStroke.Parent = MainFrame
-UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-UIStroke.Color = Color3.fromRGB(60, 60, 60)
+local UIStroke = Instance.new("UIStroke", Frame)
 UIStroke.Thickness = 2
+UIStroke.Color = Color3.fromRGB(255, 255, 255)
 
--- Title
-Title.Parent = MainFrame
-Title.Text = "⚡ Morvex Panel"
+local Title = Instance.new("TextLabel", Frame)
+Title.Text = "Morvex Panel"
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
 
--- Speed Box
-SpeedBox.Parent = MainFrame
-SpeedBox.PlaceholderText = "Speed"
-SpeedBox.Text = ""
-SpeedBox.Position = UDim2.new(0.1, 0, 0.25, 0)
-SpeedBox.Size = UDim2.new(0.8, 0, 0, 30)
-SpeedBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-SpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-SpeedBox.Font = Enum.Font.Gotham
-SpeedBox.TextSize = 14
-Instance.new("UICorner", SpeedBox).CornerRadius = UDim.new(0, 8)
+-- Fly Vars
+local flying = false
+local flySpeed = 50
+local flyConnection
 
--- Jump Box
-JumpBox.Parent = MainFrame
-JumpBox.PlaceholderText = "JumpPower"
-JumpBox.Text = ""
-JumpBox.Position = UDim2.new(0.1, 0, 0.45, 0)
-JumpBox.Size = UDim2.new(0.8, 0, 0, 30)
-JumpBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-JumpBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-JumpBox.Font = Enum.Font.Gotham
-JumpBox.TextSize = 14
-Instance.new("UICorner", JumpBox).CornerRadius = UDim.new(0, 8)
+-- Walk/Jump
+local WalkSpeedBox = Instance.new("TextBox", Frame)
+WalkSpeedBox.PlaceholderText = "WalkSpeed"
+WalkSpeedBox.Position = UDim2.new(0, 10, 0, 50)
+WalkSpeedBox.Size = UDim2.new(0, 100, 0, 25)
 
--- AutoEnable Button
-AutoEnable.Parent = MainFrame
-AutoEnable.Text = "Auto Enable: OFF"
-AutoEnable.Position = UDim2.new(0.1, 0, 0.65, 0)
-AutoEnable.Size = UDim2.new(0.8, 0, 0, 30)
-AutoEnable.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-AutoEnable.TextColor3 = Color3.fromRGB(255, 255, 255)
-AutoEnable.Font = Enum.Font.Gotham
-AutoEnable.TextSize = 14
-Instance.new("UICorner", AutoEnable).CornerRadius = UDim.new(0, 8)
+local JumpPowerBox = Instance.new("TextBox", Frame)
+JumpPowerBox.PlaceholderText = "JumpPower"
+JumpPowerBox.Position = UDim2.new(0, 130, 0, 50)
+JumpPowerBox.Size = UDim2.new(0, 100, 0, 25)
 
--- Apply Button
-ApplyButton.Parent = MainFrame
+local ApplyButton = Instance.new("TextButton", Frame)
 ApplyButton.Text = "Apply"
-ApplyButton.Position = UDim2.new(0.1, 0, 0.82, 0)
-ApplyButton.Size = UDim2.new(0.8, 0, 0, 30)
-ApplyButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+ApplyButton.Size = UDim2.new(0, 230, 0, 25)
+ApplyButton.Position = UDim2.new(0, 10, 0, 80)
+ApplyButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 ApplyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ApplyButton.Font = Enum.Font.GothamBold
-ApplyButton.TextSize = 14
-Instance.new("UICorner", ApplyButton).CornerRadius = UDim.new(0, 8)
 
--- Variables
-local autoEnabled = false
+-- Fly Speed
+local FlySpeedBox = Instance.new("TextBox", Frame)
+FlySpeedBox.PlaceholderText = "Fly Speed"
+FlySpeedBox.Position = UDim2.new(0, 10, 0, 120)
+FlySpeedBox.Size = UDim2.new(0, 100, 0, 25)
 
--- AutoEnable toggle
-AutoEnable.MouseButton1Click:Connect(function()
-	autoEnabled = not autoEnabled
-	AutoEnable.Text = autoEnabled and "Auto Enable: ON" or "Auto Enable: OFF"
-end)
+local FlyButton = Instance.new("TextButton", Frame)
+FlyButton.Text = "Toggle Fly"
+FlyButton.Size = UDim2.new(0, 100, 0, 25)
+FlyButton.Position = UDim2.new(0, 130, 0, 120)
+FlyButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+FlyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Apply button function
+-- Player Fly
+local PlayerBox = Instance.new("TextBox", Frame)
+PlayerBox.PlaceholderText = "Player Name"
+PlayerBox.Position = UDim2.new(0, 10, 0, 160)
+PlayerBox.Size = UDim2.new(0, 100, 0, 25)
+
+local PlayerFlyButton = Instance.new("TextButton", Frame)
+PlayerFlyButton.Text = "Make Fly"
+PlayerFlyButton.Size = UDim2.new(0, 100, 0, 25)
+PlayerFlyButton.Position = UDim2.new(0, 130, 0, 160)
+PlayerFlyButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+PlayerFlyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+-- Functions
 ApplyButton.MouseButton1Click:Connect(function()
-	local plr = game.Players.LocalPlayer
-	local char = plr.Character or plr.CharacterAdded:Wait()
-	local hum = char:FindFirstChildOfClass("Humanoid")
-
-	if hum then
-		local speed = tonumber(SpeedBox.Text)
-		local jump = tonumber(JumpBox.Text)
-
-		if speed then hum.WalkSpeed = speed end
-		if jump then
-			hum.UseJumpPower = true
-			hum.JumpPower = jump
-		end
-	end
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChildOfClass("Humanoid") then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if tonumber(WalkSpeedBox.Text) then
+            hum.WalkSpeed = tonumber(WalkSpeedBox.Text)
+        end
+        if tonumber(JumpPowerBox.Text) then
+            hum.JumpPower = tonumber(JumpPowerBox.Text)
+        end
+    end
 end)
 
--- Reset detection
-game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
-	if autoEnabled then
-		local hum = char:WaitForChild("Humanoid")
-		hum.WalkSpeed = tonumber(SpeedBox.Text) or 16
-		hum.UseJumpPower = true
-		hum.JumpPower = tonumber(JumpBox.Text) or 50
-	end
+local function Fly(char)
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not hum or not root then return end
+
+    flying = true
+    flyConnection = game:GetService("RunService").Heartbeat:Connect(function()
+        local move = Vector3.zero
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            move = move + root.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            move = move - root.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            move = move - root.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            move = move + root.CFrame.RightVector
+        end
+        root.Velocity = move * flySpeed
+    end)
+end
+
+local function StopFly()
+    flying = false
+    if flyConnection then
+        flyConnection:Disconnect()
+        flyConnection = nil
+    end
+end
+
+FlyButton.MouseButton1Click:Connect(function()
+    if flying then
+        StopFly()
+    else
+        local char = LocalPlayer.Character
+        if FlySpeedBox.Text ~= "" then
+            flySpeed = tonumber(FlySpeedBox.Text) or 50
+        end
+        Fly(char)
+    end
+end)
+
+-- Shortcut Key (F)
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.KeyCode == Enum.KeyCode.F then
+        if flying then
+            StopFly()
+        else
+            local char = LocalPlayer.Character
+            Fly(char)
+        end
+    end
+end)
+
+-- Player Fly
+PlayerFlyButton.MouseButton1Click:Connect(function()
+    local targetName = PlayerBox.Text
+    if targetName ~= "" then
+        local target = Players:FindFirstChild(targetName)
+        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            Fly(target.Character)
+        end
+    end
 end)
