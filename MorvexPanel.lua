@@ -1,156 +1,148 @@
--- Morvex Panel (Updated with Fly + Player Control)
--- UI + Functions
-
+-- Morvex Tiny Panel (LocalScript)
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+-- حط هنا الـ AssetId بتاع الصورة اللي رفعتها
+local IMAGE_ASSET = "rbxassetid://106976568325950"
 
 -- GUI
-local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
-local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 250, 0, 300)
-Frame.Position = UDim2.new(0.5, -125, 0.5, -150)
-Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Frame.Active = true
-Frame.Draggable = true
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MorvexTinyGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
 
-local UIStroke = Instance.new("UIStroke", Frame)
-UIStroke.Thickness = 2
-UIStroke.Color = Color3.fromRGB(255, 255, 255)
+-- الايقونة (مربع صغير عايم)
+local iconBtn = Instance.new("ImageButton")
+iconBtn.Name = "MorvexIcon"
+iconBtn.Size = UDim2.new(0, 60, 0, 60)
+iconBtn.Position = UDim2.new(0.02, 0, 0.4, 0)
+iconBtn.Image = IMAGE_ASSET
+iconBtn.BackgroundTransparency = 0.2
+iconBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+iconBtn.AutoButtonColor = true
+iconBtn.Active = true
+iconBtn.Draggable = true
+iconBtn.Parent = screenGui
 
-local Title = Instance.new("TextLabel", Frame)
-Title.Text = "Morvex Panel"
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- البانل
+local panel = Instance.new("Frame")
+panel.Name = "MorvexPanel"
+panel.Size = UDim2.new(0, 250, 0, 200)
+panel.Position = UDim2.new(0.05, 0, 0.45, 0)
+panel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+panel.BackgroundTransparency = 0.15
+panel.BorderSizePixel = 0
+panel.Visible = false
+panel.Active = true
+panel.Draggable = true
+panel.Parent = screenGui
 
--- Fly Vars
-local flying = false
-local flySpeed = 50
-local flyConnection
+-- عنوان
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 32)
+title.BackgroundTransparency = 1
+title.Text = "Morvex Panel"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Parent = panel
 
--- Walk/Jump
-local WalkSpeedBox = Instance.new("TextBox", Frame)
-WalkSpeedBox.PlaceholderText = "WalkSpeed"
-WalkSpeedBox.Position = UDim2.new(0, 10, 0, 50)
-WalkSpeedBox.Size = UDim2.new(0, 100, 0, 25)
+-- Speed
+local speedLbl = Instance.new("TextLabel", panel)
+speedLbl.Size = UDim2.new(0.5, 0, 0, 28)
+speedLbl.Position = UDim2.new(0, 8, 0, 40)
+speedLbl.BackgroundTransparency = 1
+speedLbl.Text = "Speed"
+speedLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-local JumpPowerBox = Instance.new("TextBox", Frame)
-JumpPowerBox.PlaceholderText = "JumpPower"
-JumpPowerBox.Position = UDim2.new(0, 130, 0, 50)
-JumpPowerBox.Size = UDim2.new(0, 100, 0, 25)
+local speedBox = Instance.new("TextBox", panel)
+speedBox.Size = UDim2.new(0.45, 0, 0, 28)
+speedBox.Position = UDim2.new(0.5, -8, 0, 40)
+speedBox.Text = "55"
+speedBox.ClearTextOnFocus = false
+speedBox.PlaceholderText = "WalkSpeed"
 
-local ApplyButton = Instance.new("TextButton", Frame)
-ApplyButton.Text = "Apply"
-ApplyButton.Size = UDim2.new(0, 230, 0, 25)
-ApplyButton.Position = UDim2.new(0, 10, 0, 80)
-ApplyButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-ApplyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- JumpPower
+local jumpLbl = Instance.new("TextLabel", panel)
+jumpLbl.Size = UDim2.new(0.5, 0, 0, 28)
+jumpLbl.Position = UDim2.new(0, 8, 0, 76)
+jumpLbl.BackgroundTransparency = 1
+jumpLbl.Text = "JumpPower"
+jumpLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Fly Speed
-local FlySpeedBox = Instance.new("TextBox", Frame)
-FlySpeedBox.PlaceholderText = "Fly Speed"
-FlySpeedBox.Position = UDim2.new(0, 10, 0, 120)
-FlySpeedBox.Size = UDim2.new(0, 100, 0, 25)
+local jumpBox = Instance.new("TextBox", panel)
+jumpBox.Size = UDim2.new(0.45, 0, 0, 28)
+jumpBox.Position = UDim2.new(0.5, -8, 0, 76)
+jumpBox.Text = "55"
+jumpBox.ClearTextOnFocus = false
+jumpBox.PlaceholderText = "JumpPower"
 
-local FlyButton = Instance.new("TextButton", Frame)
-FlyButton.Text = "Toggle Fly"
-FlyButton.Size = UDim2.new(0, 100, 0, 25)
-FlyButton.Position = UDim2.new(0, 130, 0, 120)
-FlyButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-FlyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- زر التفعيل
+local enableBtn = Instance.new("TextButton", panel)
+enableBtn.Size = UDim2.new(0.9, 0, 0, 30)
+enableBtn.Position = UDim2.new(0.05, 0, 0, 116)
+enableBtn.Text = "تفعيل"
+enableBtn.Font = Enum.Font.GothamBold
+enableBtn.TextSize = 16
+enableBtn.BackgroundColor3 = Color3.fromRGB(100, 50, 150)
+enableBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Player Fly
-local PlayerBox = Instance.new("TextBox", Frame)
-PlayerBox.PlaceholderText = "Player Name"
-PlayerBox.Position = UDim2.new(0, 10, 0, 160)
-PlayerBox.Size = UDim2.new(0, 100, 0, 25)
+-- زر قفل البانل
+local closeBtn = Instance.new("TextButton", panel)
+closeBtn.Size = UDim2.new(0.9, 0, 0, 28)
+closeBtn.Position = UDim2.new(0.05, 0, 0, 154)
+closeBtn.Text = "إغلاق"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 16
+closeBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-local PlayerFlyButton = Instance.new("TextButton", Frame)
-PlayerFlyButton.Text = "Make Fly"
-PlayerFlyButton.Size = UDim2.new(0, 100, 0, 25)
-PlayerFlyButton.Position = UDim2.new(0, 130, 0, 160)
-PlayerFlyButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-PlayerFlyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- حالة
+local active = false
+local savedSpeed = 55
+local savedJump = 55
 
--- Functions
-ApplyButton.MouseButton1Click:Connect(function()
-    local char = LocalPlayer.Character
-    if char and char:FindFirstChildOfClass("Humanoid") then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if tonumber(WalkSpeedBox.Text) then
-            hum.WalkSpeed = tonumber(WalkSpeedBox.Text)
-        end
-        if tonumber(JumpPowerBox.Text) then
-            hum.JumpPower = tonumber(JumpPowerBox.Text)
-        end
-    end
-end)
-
-local function Fly(char)
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    local root = char:FindFirstChild("HumanoidRootPart")
-    if not hum or not root then return end
-
-    flying = true
-    flyConnection = game:GetService("RunService").Heartbeat:Connect(function()
-        local move = Vector3.zero
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-            move = move + root.CFrame.LookVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-            move = move - root.CFrame.LookVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-            move = move - root.CFrame.RightVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-            move = move + root.CFrame.RightVector
-        end
-        root.Velocity = move * flySpeed
+-- دوال
+local function applyValues(h)
+    if not h then return end
+    local s = tonumber(speedBox.Text) or savedSpeed
+    local j = tonumber(jumpBox.Text) or savedJump
+    savedSpeed, savedJump = s, j
+    pcall(function()
+        h.UseJumpPower = true
+        h.WalkSpeed = s
+        h.JumpPower = j
     end)
 end
 
-local function StopFly()
-    flying = false
-    if flyConnection then
-        flyConnection:Disconnect()
-        flyConnection = nil
-    end
-end
+-- لما تدوس على الايقونة يفتح/يقفل البانل
+iconBtn.MouseButton1Click:Connect(function()
+    panel.Visible = not panel.Visible
+end)
 
-FlyButton.MouseButton1Click:Connect(function()
-    if flying then
-        StopFly()
+-- زر التفعيل
+enableBtn.MouseButton1Click:Connect(function()
+    local char = player.Character
+    if not char then return end
+    local h = char:FindFirstChildOfClass("Humanoid")
+    if not h then return end
+
+    if not active then
+        applyValues(h)
+        active = true
+        enableBtn.Text = "إلغاء"
+        enableBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
     else
-        local char = LocalPlayer.Character
-        if FlySpeedBox.Text ~= "" then
-            flySpeed = tonumber(FlySpeedBox.Text) or 50
-        end
-        Fly(char)
+        h.WalkSpeed = 16
+        h.JumpPower = 50
+        active = false
+        enableBtn.Text = "تفعيل"
+        enableBtn.BackgroundColor3 = Color3.fromRGB(100, 50, 150)
     end
 end)
 
--- Shortcut Key (F)
-UserInputService.InputBegan:Connect(function(input, gpe)
-    if gpe then return end
-    if input.KeyCode == Enum.KeyCode.F then
-        if flying then
-            StopFly()
-        else
-            local char = LocalPlayer.Character
-            Fly(char)
-        end
-    end
+-- زر القفل
+closeBtn.MouseButton1Click:Connect(function()
+    panel.Visible = false
 end)
 
--- Player Fly
-PlayerFlyButton.MouseButton1Click:Connect(function()
-    local targetName = PlayerBox.Text
-    if targetName ~= "" then
-        local target = Players:FindFirstChild(targetName)
-        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-            Fly(target.Character)
-        end
-    end
-end)
