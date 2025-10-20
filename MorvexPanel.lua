@@ -1,4 +1,4 @@
--- Morvex Panel v1.3 (Integrated smooth fly)
+-- Morvex Panel v1.3 (Integrated smooth fly) (powered by chatgpt)
 -- Put as LocalScript in StarterPlayerScripts or run as client script via executor.
 
 local Players = game:GetService("Players")
